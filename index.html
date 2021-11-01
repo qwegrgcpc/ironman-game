@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>IronMan Go</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+
+
+    <style type="text/css">
+        canvas {
+            border-left: 1px solid rgba(233, 233, 233, 0.3);
+            border-right: 1px solid rgba(233, 233, 233, 0.3);
+        }
+
+        #canvas {
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #intro {
+            /* height:100vh ; */
+            /* background-image: url(./img/fistStepImg.png); */
+            /* background-repeat: no-repeat; */
+            /* background-size: cover; */
+            /* background-position: right bottom; */
+        }
+
+        .ml15 {
+            font-weight: 800;
+            font-size: 3.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+        }
+
+        .ml15 .word {
+            display: inline-block;
+            line-height: 1em;
+        }
+
+
+        /* .modal-lg{
+            width: 10000px;
+        } */
+    </style>
+
+</head>
+
+<body>
+    <div class="wrapper"
+        style=" height:100vh ;background-image: url(./img/background-gaming-13.jpg); background-repeat: no-repeat; background-size: cover;">
+        <div class="container">
+            <h1 class="display-4 text-monospace text-secondary text-center">IronMan Go</h1>
+            <canvas id="canvas" width="400" height="500" class="text-center">
+            </canvas>
+            <img src="./img/ironMan2.png" id="ironMan" alt="" style="display: none;">
+        </div>
+
+        <!-- 開始彈框 -->
+        <div id="intro" class="modal inmodal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static"
+            data-keyboard="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content" style="background-color:rgba(255, 255, 255, 0.01);border:0">
+                    <div class="modal-header text-center" style="border:0">
+                        <!-- <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button> -->
+                        <div class="modal-title display-4 text-monospace text-secondary text-light ml15 ml-5"
+                            style="border:0">
+                            <span class="word">IronMan</span>
+                            <span class="word">Go</span>
+                        </div>
+                    </div>
+                    <div class="modal-body text-white text-center" style="border:1px dotted gray">
+                        透過左右方向鍵閃躲，幫助鋼鐵人躲過重重的阻礙吧
+                    </div>
+                    <div class="modal-footer" style="border:0">
+                        <button id="startBtn" class="btn btn-outline-danger" data-dismiss="modal">START GAME</button>
+                        <!-- <button class="btn">Cancel</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="d-none" id="firstBtn" type="button" class="btn btn-primary" data-toggle="modal"
+            data-target="#intro">...</button>
+
+        <!-- 結束彈框 -->
+        <div class="modal" id="myModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">遊戲結束</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        這次的得到的分數是<span id="scoreText"></span>分
+                    </div>
+                    <div class="modal-footer">
+                        <button id="restartBtn" type="button" class="btn btn-danger" data-dismiss="modal">再玩一局</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="endBtn" type="button" class="btn btn-primary d-none" data-toggle="modal" data-target="#myModal">
+    </button>
+
+    </div>
+
+
+
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+    <script>
+        // 開啟時自動彈框
+        var e = document.createEvent("MouseEvents");
+        e.initEvent("click", true, true);
+        document.getElementById("firstBtn").dispatchEvent(e);
+
+        anime.timeline({ loop: false })
+            .add({
+                targets: '.ml15 .word',
+                scale: [14, 1],
+                opacity: [0, 1],
+                easing: "easeOutCirc",
+                duration: 800,
+                delay: (el, i) => 800 * i
+            })
+
+        $(function () {
+            // this is the same as document.getElementById('canvas');
+            var canvas = $('#canvas')[0];
+            // different browsers support different contexts. All support 2d
+            var context = canvas.getContext('2d');
+            window.onload = drawIM;
+
+            var paddleX = 200;
+            var paddleY = 460;
+
+            var paddleWidth = 25;
+            var paddleHeight = 15;
+
+            var paddleDeltaX = 0;
+            var paddleDeltaY = 0;
+
+            function drawPaddle() {
+                context.fillStyle = 'rgba(50,100,50,.1)';
+                context.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
+            };
+
+            // drawPaddle();
+
+            var ballX = 300;
+            var ballY = 300;
+            var ballRadius = 10;
+
+            function drawIM() {
+                context.drawImage(ironMan, paddleX, paddleY, 24, 40);
+            };
+
+            function drawBg() {
+                context.drawImage(Bg, 0, 0, 400, 500);
+
+            };
+
+            var bricksPerRow = 8;
+            var brickHeight = 20;
+            var brickWidth = canvas.width / bricksPerRow;
+
+            var bricks = [];
+
+            function randomBricks() {
+                var arr = [];
+
+                for (i = 1; i <= bricksPerRow; i++) {
+                    arr.push(Math.floor(Math.random() * 1.05));
+                };
+
+                bricks.unshift(arr);
+                drawBrick()
+
+                if (bricks.length > 30) {
+                    bricks.pop();
+                }
+
+            };
+            function createBricks() {
+                for (var i = 0; i < bricks.length; i++) {
+                    for (var j = 0; j < bricks[i].length; j++) {
+                        drawBrick(j, i, bricks[i][j]);
+                    }
+                }
+            }
+
+            var bricksloop;
+            var bricksSpeed = 130;
+
+            function brickSpeed() {
+                if (bricksSpeed > 69) {
+                    bricksSpeed = bricksSpeed - 30;
+                    clearInterval(bricksloop);
+                    bricksloop = setInterval(randomBricks, bricksSpeed)
+                } else {
+                    return
+                }
+                return
+            }
+
+            var speed = setInterval(brickSpeed, 30000)
+
+
+
+
+
+            // draw a single brick
+            function drawBrick(x, y, type) {
+                switch (type) { // if brick is still visible; three colors for three types of bricks
+                    case 1:
+                        context.fillStyle = 'firebrick';
+                        break;
+                    case 2:
+                        context.fillStyle = 'rgb(100,200,100)';
+                        break;
+                    case 3:
+                        context.fillStyle = 'rgba(50,100,50,.5)';
+                        break;
+                    default:
+                        context.clearRect(x * brickWidth, y * brickHeight, brickWidth,
+                            brickHeight);
+                        break;
+
+                }
+                if (type) {
+                    //Draw rectangle with fillStyle color selected earlier
+                    context.fillRect(x * brickWidth, y * brickHeight, brickWidth,
+                        brickHeight);
+                    // Also draw blackish border around the brick
+                    context.strokeRect(x * brickWidth + 1, y * brickHeight + 1,
+                        brickWidth - 2, brickHeight - 2);
+                }
+            }
+
+            // createBricks();
+
+            // Game score
+            var score = 0;
+            let getScore;
+
+            function displayScoreBoard() {
+                //Set the text font and color
+                context.fillStyle = '#FEFEFE';
+                context.font = "20px Times New Roman";
+
+                //Clear the bottom 30 pixels of the canvas
+                context.clearRect(0, canvas.height - 30, canvas.width, 30);
+                // Write Text 5 pixels from the bottom of the canvas
+                context.fillText('Score: ' + score, 10, canvas.height - 5);
+
+            }
+
+            // displayScoreBoard();
+
+            function animate() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                // drawBg();
+                createBricks();
+                displayScoreBoard();
+                movePaddle();
+                drawPaddle();
+                collisionXWithBricks();
+                drawIM()
+            }
+
+            var gameLoop;
+            var paddleMove;
+
+            function startGame() {
+                bricksSpeed = 130
+                bricks = [];
+                paddleMove = 'NONE';
+                paddleDeltaX = 0;
+                score = 0;
+
+                // brick start fall
+                bricksloop = setInterval(randomBricks, bricksSpeed);
+
+                // countScore
+                getScore = setInterval(() => {
+                    score = score + 1;
+                }, 1000);
+
+                // call the animate() function every 200ms until clearInterval(gameLoop) is called
+                gameLoop = setInterval(animate, 20);
+
+                // Start Tracking Keystokes
+                $(document).keydown(function (evt) {
+                    if (evt.keyCode == 39) {
+                        paddleMove = 'RIGHT';
+                    } else if (evt.keyCode == 37) {
+                        paddleMove = 'LEFT';
+                    }
+                });
+
+                $(document).keyup(function (evt) {
+                    if (evt.keyCode == 39) {
+                        paddleMove = 'NONE';
+                    } else if (evt.keyCode == 37) {
+                        paddleMove = 'NONE';
+                    }
+                    currentTime = 0
+                });
+            }
+            document.getElementById('startBtn').addEventListener("click", startGame);
+            document.getElementById('restartBtn').addEventListener("click", startGame);
+
+            var paddleDeltaX;
+            var paddleSpeedX = 4;
+
+            function movePaddle() {
+                if (paddleMove == 'LEFT') {
+                    paddleDeltaX = -paddleSpeedX;
+                } else if (paddleMove == 'RIGHT') {
+                    paddleDeltaX = paddleSpeedX;
+                } else {
+                    paddleDeltaX = 0;
+                }
+                // If paddle reaches the ends, then don't let it move 
+                if (paddleX + paddleDeltaX < 0 || paddleX + paddleDeltaX + paddleWidth > canvas.width) {
+                    paddleDeltaX = 0;
+                }
+                paddleX = paddleX + paddleDeltaX;
+            }
+
+
+            function endGame() {
+                clearInterval(gameLoop);
+                clearInterval(bricksloop);
+                clearInterval(getScore);
+                context.fillStyle = '#FFFFFF';
+                context.fillText('oops!!!!', canvas.width / 2, canvas.height / 2);
+
+                document.getElementById('scoreText').innerText = score
+                var eve = document.createEvent("MouseEvents");
+                eve.initEvent("click", true, true);
+                document.getElementById("endBtn").dispatchEvent(eve);
+            }
+
+            // startGame();
+
+            // gameLoop = setInterval(animate, 20);
+
+
+            function collisionXWithBricks() {
+                // var bumpedX = false;
+                for (var i = 0; i < bricks.length; i++) {
+                    for (var j = 0; j < bricks[i].length; j++) {
+                        if (bricks[i][j]) { // if brick is still visible
+                            var brickX = j * brickWidth;
+                            var brickY = i * brickHeight;
+                            if (
+                                // barely touching from left
+                                (paddleX + paddleWidth == brickX)
+                                ||
+                                // barely touching from right
+                                (paddleX == brickX + brickWidth)
+                                &&
+                                (paddleY == brickY + brickHeight)
+                            ) {
+                                endGame()
+                            } else if (
+                                (paddleY == brickY + brickHeight)
+                                &&
+                                (brickX <= paddleX && paddleX <= brickX + brickWidth)
+                            ) {
+                                endGame()
+                            } else if (
+                                (paddleY == brickY + brickHeight)
+                                &&
+                                (brickX <= paddleX + paddleWidth && paddleX + paddleWidth <= brickX + brickWidth)
+                            ) {
+                                endGame()
+                            }
+                        }
+                    }
+                }
+            }
+
+            // startGame();
+            // document.getElementById('restartBtn').addEventListener("click",startGame());
+            // document.getElementById('restartBtn').addEventListener("click",console.log("!!"));
+        });
+    </script>
+
+</body>
+
+</html>
