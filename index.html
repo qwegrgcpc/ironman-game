@@ -125,11 +125,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
     <script>
-        // 開啟時自動彈框
-        var e = document.createEvent("MouseEvents");
-        e.initEvent("click", true, true);
-        document.getElementById("firstBtn").dispatchEvent(e);
+        // 開啟時自動彈窗
+        document.getElementById("firstBtn").click();
 
+        // 進場文字效果
         anime.timeline({ loop: false })
             .add({
                 targets: '.ml15 .word',
@@ -142,61 +141,46 @@
 
         $(function () {
             // this is the same as document.getElementById('canvas');
-            var canvas = $('#canvas')[0];
+            // var canvas = $('#canvas')[0];
+            const canvas = document.getElementById('canvas')
             // different browsers support different contexts. All support 2d
-            var context = canvas.getContext('2d');
-            window.onload = drawIM;
+            const context = canvas.getContext('2d');
+            window.onload = drawIronMan;
 
-            var paddleX = 200;
-            var paddleY = 460;
+            var ironManX = 200;
+            var ironManY = 460;
 
-            var paddleWidth = 25;
-            var paddleHeight = 15;
+            var ironManWidth = 25;
+            var ironManHeight = 15;
 
-            var paddleDeltaX = 0;
+            var ironManDeltaX = 0;
             var paddleDeltaY = 0;
 
-            function drawPaddle() {
-                context.fillStyle = 'rgba(50,100,50,.1)';
-                context.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
-            };
-
-            // drawPaddle();
-
-            var ballX = 300;
-            var ballY = 300;
-            var ballRadius = 10;
-
-            function drawIM() {
-                context.drawImage(ironMan, paddleX, paddleY, 24, 40);
+            function drawIronMan() {
+                context.drawImage(ironMan, ironManX, ironManY, 24, 40);
             };
 
             function drawBg() {
                 context.drawImage(Bg, 0, 0, 400, 500);
-
             };
 
-            var bricksPerRow = 8;
-            var brickHeight = 20;
-            var brickWidth = canvas.width / bricksPerRow;
+            const bricksPerRow = 8;
+            const brickHeight = 20;
+            const brickWidth = canvas.width / bricksPerRow;
 
             var bricks = [];
 
             function randomBricks() {
-                var arr = [];
-
+                const arr = [];
                 for (i = 1; i <= bricksPerRow; i++) {
                     arr.push(Math.floor(Math.random() * 1.05));
                 };
-
                 bricks.unshift(arr);
                 drawBrick()
-
-                if (bricks.length > 30) {
-                    bricks.pop();
-                }
-
+                // 磚塊超過30行時開始移除
+                if (bricks.length > 30) bricks.pop();
             };
+
             function createBricks() {
                 for (var i = 0; i < bricks.length; i++) {
                     for (var j = 0; j < bricks[i].length; j++) {
@@ -205,8 +189,8 @@
                 }
             }
 
-            var bricksloop;
-            var bricksSpeed = 130;
+            let bricksloop;
+            let bricksSpeed = 130;
 
             function brickSpeed() {
                 if (bricksSpeed > 69) {
@@ -219,44 +203,24 @@
                 return
             }
 
-            var speed = setInterval(brickSpeed, 30000)
-
-
-
-
-
-            // draw a single brick
+            // 生成單一磚塊
             function drawBrick(x, y, type) {
-                switch (type) { // if brick is still visible; three colors for three types of bricks
-                    case 1:
-                        context.fillStyle = 'firebrick';
-                        break;
-                    case 2:
-                        context.fillStyle = 'rgb(100,200,100)';
-                        break;
-                    case 3:
-                        context.fillStyle = 'rgba(50,100,50,.5)';
-                        break;
-                    default:
-                        context.clearRect(x * brickWidth, y * brickHeight, brickWidth,
-                            brickHeight);
-                        break;
-
-                }
                 if (type) {
-                    //Draw rectangle with fillStyle color selected earlier
+                    // 顏色
+                    context.fillStyle = 'firebrick';
+                    // 寬高
                     context.fillRect(x * brickWidth, y * brickHeight, brickWidth,
                         brickHeight);
-                    // Also draw blackish border around the brick
+                    // border
                     context.strokeRect(x * brickWidth + 1, y * brickHeight + 1,
                         brickWidth - 2, brickHeight - 2);
+
                 }
             }
 
-            // createBricks();
 
-            // Game score
-            var score = 0;
+            // 遊戲分數
+            let score = 0;
             let getScore;
 
             function displayScoreBoard() {
@@ -278,24 +242,25 @@
                 // drawBg();
                 createBricks();
                 displayScoreBoard();
-                movePaddle();
-                drawPaddle();
+                moveIronMan();
                 collisionXWithBricks();
-                drawIM()
+                drawIronMan()
             }
 
             var gameLoop;
-            var paddleMove;
+            var speed
+            var ironManMove;
 
             function startGame() {
                 bricksSpeed = 130
                 bricks = [];
-                paddleMove = 'NONE';
-                paddleDeltaX = 0;
+                ironManMove = 'NONE';
+                ironManDeltaX = 0;
                 score = 0;
-
+                console.log('start')
                 // brick start fall
                 bricksloop = setInterval(randomBricks, bricksSpeed);
+                speed = setInterval(brickSpeed, 30000)
 
                 // countScore
                 getScore = setInterval(() => {
@@ -308,17 +273,17 @@
                 // Start Tracking Keystokes
                 $(document).keydown(function (evt) {
                     if (evt.keyCode == 39) {
-                        paddleMove = 'RIGHT';
+                        ironManMove = 'RIGHT';
                     } else if (evt.keyCode == 37) {
-                        paddleMove = 'LEFT';
+                        ironManMove = 'LEFT';
                     }
                 });
 
                 $(document).keyup(function (evt) {
                     if (evt.keyCode == 39) {
-                        paddleMove = 'NONE';
+                        ironManMove = 'NONE';
                     } else if (evt.keyCode == 37) {
-                        paddleMove = 'NONE';
+                        ironManMove = 'NONE';
                     }
                     currentTime = 0
                 });
@@ -326,22 +291,23 @@
             document.getElementById('startBtn').addEventListener("click", startGame);
             document.getElementById('restartBtn').addEventListener("click", startGame);
 
-            var paddleDeltaX;
-            var paddleSpeedX = 4;
+            // var ironManDeltaX;
+            var ironManSpeedX = 4;
 
-            function movePaddle() {
-                if (paddleMove == 'LEFT') {
-                    paddleDeltaX = -paddleSpeedX;
-                } else if (paddleMove == 'RIGHT') {
-                    paddleDeltaX = paddleSpeedX;
+            function moveIronMan() {
+                if (ironManMove == 'LEFT') {
+                    ironManDeltaX = -ironManSpeedX;
+                } else if (ironManMove == 'RIGHT') {
+                    ironManDeltaX = ironManSpeedX;
                 } else {
-                    paddleDeltaX = 0;
+                    ironManDeltaX = 0;
                 }
-                // If paddle reaches the ends, then don't let it move 
-                if (paddleX + paddleDeltaX < 0 || paddleX + paddleDeltaX + paddleWidth > canvas.width) {
-                    paddleDeltaX = 0;
+                // 鋼鐵人超出範圍時則停止移動 
+                console.log(ironManX + ironManDeltaX + ironManWidth, canvas.width)
+                if (ironManX + ironManDeltaX < 0 || ironManX + ironManDeltaX + ironManWidth > canvas.width) {
+                    ironManDeltaX = 0;
                 }
-                paddleX = paddleX + paddleDeltaX;
+                ironManX = ironManX + ironManDeltaX;
             }
 
 
@@ -349,6 +315,7 @@
                 clearInterval(gameLoop);
                 clearInterval(bricksloop);
                 clearInterval(getScore);
+                clearInterval(speed);
                 context.fillStyle = '#FFFFFF';
                 context.fillText('oops!!!!', canvas.width / 2, canvas.height / 2);
 
@@ -362,7 +329,7 @@
 
             // gameLoop = setInterval(animate, 20);
 
-
+            // 撞擊判定
             function collisionXWithBricks() {
                 // var bumpedX = false;
                 for (var i = 0; i < bricks.length; i++) {
@@ -372,24 +339,24 @@
                             var brickY = i * brickHeight;
                             if (
                                 // barely touching from left
-                                (paddleX + paddleWidth == brickX)
+                                (ironManX + ironManWidth == brickX)
                                 ||
                                 // barely touching from right
-                                (paddleX == brickX + brickWidth)
+                                (ironManX == brickX + brickWidth)
                                 &&
-                                (paddleY == brickY + brickHeight)
+                                (ironManY == brickY + brickHeight)
                             ) {
                                 endGame()
                             } else if (
-                                (paddleY == brickY + brickHeight)
+                                (ironManY == brickY + brickHeight)
                                 &&
-                                (brickX <= paddleX && paddleX <= brickX + brickWidth)
+                                (brickX <= ironManX && ironManX <= brickX + brickWidth)
                             ) {
                                 endGame()
                             } else if (
-                                (paddleY == brickY + brickHeight)
+                                (ironManY == brickY + brickHeight)
                                 &&
-                                (brickX <= paddleX + paddleWidth && paddleX + paddleWidth <= brickX + brickWidth)
+                                (brickX <= ironManX + ironManWidth && ironManX + ironManWidth <= brickX + brickWidth)
                             ) {
                                 endGame()
                             }
